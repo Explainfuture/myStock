@@ -3,9 +3,9 @@ import { getChartCaseData } from '@/lib/data/chart-cases';
 
 export async function GET(
   _request: Request,
-  { params }: { params: { caseId: string } }
+  { params }: { params: Promise<{ caseId: string }> }
 ) {
-  const { caseId } = params;
+  const { caseId } = await params;
 
   if (!caseId) {
     return NextResponse.json({ error: 'Missing caseId' }, { status: 400 });

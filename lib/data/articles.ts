@@ -1,12 +1,10 @@
 import type { Article } from '@/lib/types';
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { getSupabaseClientCached } from '@/lib/supabase/client';
 import { mockArticles } from '@/lib/data/mock';
+import { unstable_cache } from 'next/cache';
 
-export async function getArticleByCategoryAndSlug(
-  category: string,
-  slug: string
-): Promise<Article | null> {
-  const sb = getSupabaseClient();
+async function fetchArticle(category: string, slug: string): Promise<Article | null> {
+  const sb = getSupabaseClientCached();
   if (!sb) {
     return mockArticles.find((a) => a.category_id === category && a.slug === slug) ?? null;
   }
@@ -36,3 +34,9 @@ export async function getArticleByCategoryAndSlug(
   } satisfies Article;
 }
 
+// Cache articles for 60 seconds
+export const getArticleByCategoryAndSlug = unstable_cache(
+  fetchArticle,
+  ['article'],
+  { revalidate: 60, tags: ['articles'] }
+);

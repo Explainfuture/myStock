@@ -19,7 +19,7 @@ export default function HomePage() {
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <Link
-                href="/learn"
+                href="/learn/origins"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
               >
                 开始学习 <ArrowRight className="h-4 w-4" />

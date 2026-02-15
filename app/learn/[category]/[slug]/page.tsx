@@ -8,9 +8,9 @@ import { getChartCaseData } from '@/lib/data/chart-cases';
 export default async function ArticlePage({
   params,
 }: {
-  params: { category: string; slug: string };
+  params: Promise<{ category: string; slug: string }>;
 }) {
-  const { category, slug } = params;
+  const { category, slug } = await params;
   const article = await getArticleByCategoryAndSlug(category, slug);
   if (!article) notFound();
 

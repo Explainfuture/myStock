@@ -31,12 +31,9 @@ export default function TopNav({
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem('theme');
-    const prefersDark =
-      window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldDark = saved ? saved === 'dark' : prefersDark;
-    setDark(shouldDark);
-    document.documentElement.classList.toggle('dark', shouldDark);
+    // Sync with the class set by the inline script in layout.tsx
+    const isDark = document.documentElement.classList.contains('dark');
+    setDark(isDark);
   }, []);
 
   const toggleTheme = () => {

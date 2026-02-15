@@ -1,9 +1,10 @@
-﻿"use client";
+"use client";
 
 import {
   CandlestickSeries,
   ColorType,
   HistogramSeries,
+  LineSeries,
   createChart,
   createSeriesMarkers,
 } from "lightweight-charts";
@@ -43,19 +44,23 @@ export default function ChartView({
   caseData: ChartCaseData;
   height?: number;
 }) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mainChartRef = useRef<HTMLDivElement | null>(null);
+  const indicatorChartRef = useRef<HTMLDivElement | null>(null);
 
   const coloredVolumes = useMemo(
     () => withVolumeColors(caseData.candles, caseData.volumes),
     [caseData.candles, caseData.volumes]
   );
 
+  const hasIndicators = caseData.indicators && caseData.indicators.length > 0;
+  const mainChartHeight = hasIndicators ? height - 120 : height;
+
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
+    const mainEl = mainChartRef.current;
+    if (!mainEl) return;
 
     const theme = readChartTheme();
-    const chart = createChart(el, {
+    const mainChart = createChart(mainEl, {
       autoSize: true,
       layout: {
         background: { type: ColorType.Solid, color: theme.bg },
@@ -67,10 +72,10 @@ export default function ChartView({
         horzLines: { color: theme.grid },
       },
       rightPriceScale: { borderColor: theme.border },
-      timeScale: { borderColor: theme.border },
+      timeScale: { borderColor: theme.border, visible: !hasIndicators },
     });
 
-    const candleSeries = chart.addSeries(CandlestickSeries, {
+    const candleSeries = mainChart.addSeries(CandlestickSeries, {
       upColor: COLOR_UP,
       downColor: COLOR_DOWN,
       borderVisible: false,
@@ -79,7 +84,7 @@ export default function ChartView({
     });
     candleSeries.setData(caseData.candles);
 
-    const volumeSeries = chart.addSeries(HistogramSeries, {
+    const volumeSeries = mainChart.addSeries(HistogramSeries, {
       priceFormat: { type: "volume" },
       priceScaleId: "vol",
       lastValueVisible: false,
@@ -87,8 +92,7 @@ export default function ChartView({
     });
     volumeSeries.setData(coloredVolumes);
 
-    // Compress volume scale to the bottom (~20% height).
-    chart.priceScale("vol").applyOptions({
+    mainChart.priceScale("vol").applyOptions({
       scaleMargins: { top: 0.8, bottom: 0 },
     });
 
@@ -96,12 +100,63 @@ export default function ChartView({
       ? createSeriesMarkers(candleSeries, caseData.spec.markers)
       : null;
 
-    chart.timeScale().fitContent();
+    mainChart.timeScale().fitContent();
+
+    // Indicator chart
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let indicatorChart: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const indicatorSeries: any[] = [];
+
+    if (hasIndicators && indicatorChartRef.current) {
+      indicatorChart = createChart(indicatorChartRef.current, {
+        autoSize: true,
+        layout: {
+          background: { type: ColorType.Solid, color: theme.bg },
+          textColor: theme.text,
+          attributionLogo: false,
+        },
+        grid: {
+          vertLines: { color: theme.grid },
+          horzLines: { color: theme.grid },
+        },
+        rightPriceScale: { borderColor: theme.border },
+        timeScale: { borderColor: theme.border, visible: true },
+      });
+
+      for (const indicator of caseData.indicators!) {
+        const lineSeries = indicatorChart.addSeries(LineSeries, {
+          color: indicator.color,
+          lineWidth: (indicator.lineWidth ?? 2) as 1 | 2 | 3 | 4,
+          lineStyle: (indicator.lineStyle ?? 0) as 0 | 1 | 2 | 3,
+          title: indicator.title,
+          priceLineVisible: false,
+          lastValueVisible: false,
+        });
+        lineSeries.setData(indicator.data);
+        indicatorSeries.push(lineSeries);
+      }
+
+      indicatorChart.timeScale().fitContent();
+
+      // Sync time scales
+      mainChart.timeScale().subscribeVisibleLogicalRangeChange((range: any) => {
+        if (range && indicatorChart) {
+          indicatorChart.timeScale().setVisibleLogicalRange(range);
+        }
+      });
+
+      indicatorChart.timeScale().subscribeVisibleLogicalRangeChange((range: any) => {
+        if (range && mainChart) {
+          mainChart.timeScale().setVisibleLogicalRange(range);
+        }
+      });
+    }
 
     // Keep chart theme in sync with the `dark` class toggled on <html>.
     const applyTheme = () => {
       const t = readChartTheme();
-      chart.applyOptions({
+      mainChart.applyOptions({
         layout: {
           background: { type: ColorType.Solid, color: t.bg },
           textColor: t.text,
@@ -113,6 +168,20 @@ export default function ChartView({
         rightPriceScale: { borderColor: t.border },
         timeScale: { borderColor: t.border },
       });
+      if (indicatorChart) {
+        indicatorChart.applyOptions({
+          layout: {
+            background: { type: ColorType.Solid, color: t.bg },
+            textColor: t.text,
+          },
+          grid: {
+            vertLines: { color: t.grid },
+            horzLines: { color: t.grid },
+          },
+          rightPriceScale: { borderColor: t.border },
+          timeScale: { borderColor: t.border },
+        });
+      }
     };
 
     const observer = new MutationObserver(() => applyTheme());
@@ -124,9 +193,29 @@ export default function ChartView({
     return () => {
       observer.disconnect();
       plugin?.detach();
-      chart.remove();
+      mainChart.remove();
+      if (indicatorChart) {
+        indicatorChart.remove();
+      }
     };
-  }, [caseData.candles, caseData.spec?.markers, coloredVolumes]);
+  }, [caseData.candles, caseData.spec?.markers, caseData.indicators, coloredVolumes, hasIndicators]);
 
-  return <div ref={containerRef} className="w-full" style={{ height }} />;
+  return (
+    <div className="flex flex-col gap-0">
+      <div ref={mainChartRef} className="w-full" style={{ height: mainChartHeight }} />
+      {hasIndicators && (
+        <div className="border-t border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 px-2 py-1 text-xs text-slate-500 dark:text-slate-400">
+            {caseData.indicators!.map((ind, i) => (
+              <span key={i} className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: ind.color }} />
+                {ind.title}
+              </span>
+            ))}
+          </div>
+          <div ref={indicatorChartRef} className="w-full" style={{ height: 120 }} />
+        </div>
+      )}
+    </div>
+  );
 }

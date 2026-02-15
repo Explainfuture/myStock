@@ -4,8 +4,8 @@ import { getDefaultCategoryPath } from '@/lib/routing';
 export default async function LearnCategoryIndexPage({
   params,
 }: {
-  params: { category: string };
+  params: Promise<{ category: string }>;
 }) {
-  const { category } = params;
+  const { category } = await params;
   redirect(await getDefaultCategoryPath(category));
 }

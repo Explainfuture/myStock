@@ -1,13 +1,14 @@
 import type { LayoutType, NavigationTree } from '@/lib/types';
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { getSupabaseClientCached } from '@/lib/supabase/client';
 import { mockNavigationTree } from '@/lib/data/mock';
+import { unstable_cache } from 'next/cache';
 
 function normalizeLayoutType(v: unknown): LayoutType {
   return v === 'split' ? 'split' : 'standard';
 }
 
-export async function getNavigationTree(): Promise<NavigationTree> {
-  const sb = getSupabaseClient();
+async function fetchNavigationTree(): Promise<NavigationTree> {
+  const sb = getSupabaseClientCached();
   if (!sb) return mockNavigationTree;
 
   const { data: categories, error: catErr } = await sb
@@ -69,3 +70,9 @@ export async function getNavigationTree(): Promise<NavigationTree> {
   return tree.categories.length ? tree : mockNavigationTree;
 }
 
+// Cache for 60 seconds, tag for on-demand revalidation
+export const getNavigationTree = unstable_cache(
+  fetchNavigationTree,
+  ['navigation-tree'],
+  { revalidate: 60, tags: ['navigation'] }
+);

@@ -1,4 +1,4 @@
-import type { CandlestickData, HistogramData, SeriesMarker, Time } from 'lightweight-charts';
+import type { CandlestickData, HistogramData, LineData, SeriesMarker, Time } from 'lightweight-charts';
 
 export type LayoutType = 'standard' | 'split';
 
@@ -28,9 +28,18 @@ export type ChartCaseSpec = {
   markers?: SeriesMarker<Time>[];
 };
 
+export type IndicatorLine = {
+  data: LineData<Time>[];
+  color: string;
+  lineWidth?: number;
+  lineStyle?: 0 | 1 | 2 | 3; // Solid, Dotted, Dashed, LargeDashed
+  title?: string;
+};
+
 export type ChartCaseData = {
   candles: CandlestickData<Time>[];
   volumes: HistogramData<Time>[];
   spec?: ChartCaseSpec;
+  indicators?: IndicatorLine[];
 };
 

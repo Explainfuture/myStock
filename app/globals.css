@@ -58,3 +58,13 @@ body {
   outline: 2px solid rgba(59, 130, 246, 0.6);
   outline-offset: 2px;
 }
+
+/* 股票行情滚动动画 */
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+}
