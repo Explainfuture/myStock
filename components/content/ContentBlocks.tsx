@@ -1,25 +1,34 @@
 import type { ContentBlock } from '@/lib/types';
 
+// 支持两种格式：{type:'p', text:'...'} 和 {type:'paragraph', content:'...'}
+function getText(b: any): string {
+  return b.text ?? b.content ?? '';
+}
+
 export default function ContentBlocks({ blocks }: { blocks: ContentBlock[] }) {
   return (
     <div className="flex flex-col gap-4">
-      {blocks.map((b, idx) => {
-        if (b.type === 'p') {
-          return <p key={idx}>{b.text}</p>;
+      {blocks.map((b: any, idx) => {
+        const type = b.type;
+        const text = getText(b);
+
+        if (type === 'p' || type === 'paragraph') {
+          return <p key={idx}>{text}</p>;
         }
-        if (b.type === 'h2') {
-          return <h2 key={idx}>{b.text}</h2>;
+        if (type === 'h2' || type === 'heading') {
+          return <h2 key={idx}>{text}</h2>;
         }
-        if (b.type === 'ul') {
+        if (type === 'ul' || type === 'list') {
+          const items = b.items ?? [];
           return (
             <ul key={idx}>
-              {b.items.map((it, i) => (
+              {items.map((it: string, i: number) => (
                 <li key={i}>{it}</li>
               ))}
             </ul>
           );
         }
-        if (b.type === 'callout') {
+        if (type === 'callout') {
           const base =
             'rounded-xl border px-4 py-3 text-sm leading-relaxed shadow-sm not-prose';
           const cls =
@@ -29,7 +38,7 @@ export default function ContentBlocks({ blocks }: { blocks: ContentBlock[] }) {
           return (
             <div key={idx} className={`${base} ${cls}`}>
               {b.title && <div className="mb-1 font-semibold">{b.title}</div>}
-              <div>{b.text}</div>
+              <div>{text}</div>
             </div>
           );
         }

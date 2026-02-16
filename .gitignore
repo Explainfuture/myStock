@@ -21,3 +21,4 @@ _tmp_*
 
 .DS_Store
 Thumbs.db
+seed.ts
