@@ -9,6 +9,8 @@
   --chart-text: #334155;
   --chart-grid: #e2e8f0;
   --chart-border: #cbd5e1;
+  --chart-up: #ef5350;
+  --chart-down: #26a69a;
 }
 
 .dark {
@@ -17,6 +19,8 @@
   --chart-text: #e2e8f0;
   --chart-grid: #1e293b;
   --chart-border: #334155;
+  --chart-up: #ef5350;
+  --chart-down: #26a69a;
 }
 
 html {

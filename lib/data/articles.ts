@@ -1,6 +1,6 @@
 import type { Article } from '@/lib/types';
 import { getSupabaseClientCached } from '@/lib/supabase/client';
-import { mockArticles } from '@/lib/data/mock';
+import { mockArticles } from '@/lib/data/content';
 import { unstable_cache } from 'next/cache';
 
 async function fetchArticle(category: string, slug: string): Promise<Article | null> {

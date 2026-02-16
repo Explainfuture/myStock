@@ -4,7 +4,11 @@
       "Bash(pnpm install:*)",
       "Bash(pnpm dev)",
       "Bash(pnpm add:*)",
-      "Bash(ping:*)"
+      "Bash(ping:*)",
+      "Bash(pnpm run build)",
+      "Bash(pnpm tsx:*)",
+      "Bash(npx tsx -e:*)",
+      "Bash(npx tsx verify-prod.ts)"
     ]
   }
 }

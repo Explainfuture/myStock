@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { notFound } from 'next/navigation';
-import ChartView from '@/components/chart/ChartView';
+import { ChartWrapper } from '@/components/chart';
 import ContentBlocks from '@/components/content/ContentBlocks';
 import { getArticleByCategoryAndSlug } from '@/lib/data/articles';
 import { getChartCaseData } from '@/lib/data/chart-cases';
@@ -35,11 +35,7 @@ export default async function ArticlePage({
             <h3 className="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-200">
               案例图解：{article.title}
             </h3>
-            {caseData ? (
-              <ChartView caseData={caseData} />
-            ) : (
-              <div className="text-sm text-slate-500 dark:text-slate-400">暂无案例图</div>
-            )}
+            <ChartWrapper caseData={caseData} articleTitle={article.title} />
           </div>
         </aside>
       )}

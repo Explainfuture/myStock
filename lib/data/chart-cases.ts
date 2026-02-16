@@ -1,6 +1,6 @@
 import type { ChartCaseData } from '@/lib/types';
 import { getSupabaseClientCached } from '@/lib/supabase/client';
-import { mockChartCases } from '@/lib/data/mock';
+import { mockChartCases } from '@/lib/data/content';
 import { unstable_cache } from 'next/cache';
 
 async function fetchChartCaseData(caseId: string): Promise<ChartCaseData | null> {

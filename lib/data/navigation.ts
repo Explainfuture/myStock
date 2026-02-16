@@ -1,6 +1,6 @@
 import type { LayoutType, NavigationTree } from '@/lib/types';
 import { getSupabaseClientCached } from '@/lib/supabase/client';
-import { mockNavigationTree } from '@/lib/data/mock';
+import { mockNavigationTree } from '@/lib/data/content';
 import { unstable_cache } from 'next/cache';
 
 function normalizeLayoutType(v: unknown): LayoutType {

@@ -21,7 +21,7 @@ export type Article = {
 
 export type NavArticle = Pick<Article, 'slug' | 'title' | 'layout_type'>;
 export type NavChapter = { id: string; title: string; articles: NavArticle[] };
-export type NavCategory = { id: string; name: string; chapters: NavChapter[] };
+export type NavCategory = { id: string; name: string; subTitle?: string; chapters: NavChapter[] };
 export type NavigationTree = { categories: NavCategory[] };
 
 export type ChartCaseSpec = {
